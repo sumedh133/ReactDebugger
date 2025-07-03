@@ -1,0 +1,11 @@
+ @import "tailwindcss";
+.input-phone-number input:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Only outer div gets black border on focus */
+.input-phone-number:focus-within {
+  border: 2px solid black !important;
+}
