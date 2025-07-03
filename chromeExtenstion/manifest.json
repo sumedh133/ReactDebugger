@@ -1,17 +1,11 @@
 {
-  "manifest_version": 3,
-  "name": "DevLens",
+  "name": "React Dev Helper",
   "version": "1.0",
-  "permissions": ["storage", "scripting", "tabs"],
-  "action": {
-    "default_popup": "popup.html"
-  },
-  "content_scripts": [
-    {
-      "matches": ["http://localhost/*", "http://127.0.0.1/*"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
-    }
-  ],
-  "host_permissions": ["http://localhost/*", "http://127.0.0.1/*"]
+  "manifest_version": 3,
+  "description": "Custom DevTools panel to inspect selected elements",
+  "devtools_page": "devtools.html",
+  "host_permissions": ["<all_urls>"],
+  "icons": {
+    "128": "icon.png"
+  }
 }
