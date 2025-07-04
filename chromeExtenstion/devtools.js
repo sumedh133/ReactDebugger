@@ -1,13 +1,10 @@
 chrome.devtools.panels.create("React Inspector", null, "panel.html", function (panel) {
   panel.onShown.addListener(() => {
-    // Inject helper function into the page
     chrome.devtools.inspectedWindow.eval(`(${injectInspector.toString()})()`);
 
-    // Set interval to inspect selected React component
-    setInterval(() => {
-      // Call the injected function from within the page context
+    chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
       chrome.devtools.inspectedWindow.eval(`window.__inspectReactFiber?.()`);
-    }, 1000);
+    });
   });
 });
 
@@ -38,12 +35,63 @@ function injectInspector() {
       return;
     }
 
+    // Store for future update triggers
+    window.__reactFiberTarget = current;
+
+    // Start watching for dispatches
+    patchFiberState(current);
+
+    // Inspect immediately
+    inspectFiber(current);
+  };
+
+  function inspectFiber(current) {
     const name = current.type?.name || current.elementType?.name || "[Anonymous]";
     console.clear();
     console.log(`🎯 React Component: %c${name}`, "color: green; font-weight: bold;");
     console.log("📦 Props:", current.memoizedProps);
-    console.log("🧠 State:", current.memoizedState);
-  };
+
+    function extractHookStates(hookState) {
+      const result = [];
+      let current = hookState;
+      let i = 0;
+
+      while (current) {
+        result.push({ index: i, value: current.memoizedState });
+        current = current.next;
+        i++;
+      }
+
+      return result;
+    }
+
+    const hookStates = extractHookStates(current.memoizedState);
+
+    console.log("🧠 State Hooks:");
+    hookStates.forEach(({ index, value }) => {
+      console.log(`State[${index}]:`, value);
+    });
+  }
+
+  function patchFiberState(current) {
+    let hook = current.memoizedState;
+    while (hook) {
+      if (hook.queue && hook.queue.dispatch && !hook.queue.__patched) {
+        const originalDispatch = hook.queue.dispatch;
+        hook.queue.dispatch = function (...args) {
+          const result = originalDispatch.apply(this, args);
+          setTimeout(() => {
+            if (window.__reactFiberTarget) {
+              inspectFiber(window.__reactFiberTarget);
+            }
+          }, 0);
+          return result;
+        };
+        hook.queue.__patched = true;
+      }
+      hook = hook.next;
+    }
+  }
 
   console.log("✅ React Inspector helper injected.");
 }
