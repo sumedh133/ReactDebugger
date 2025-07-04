@@ -32,21 +32,35 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     const vscodeBtn = document.getElementById("open-in-vscode");
-    if (vscodeBtn) {
-      const file = dataAttributes["data-source"];
-      
-      vscodeBtn.addEventListener("click", () => {
-        // Use your hardcoded test value
-        const path = `C:/TruEstate/debugger/lens/src/Components/Footer.tsx:60:1`;
+if (vscodeBtn) {
+  const raw = dataAttributes["data-source"]; // e.g., C:\TruEstate\...\File.tsx:60:1
+  const match = raw.match(/^(.+?):(\d+)/); // non-greedy up to first colon
 
-        // Normalize and create the vscode URL
-        const url = `vscode://file/${path.replace(/\\/g, "/")}`;
+  if (match) {
+    let absPath = match[1].replace(/\\/g, "/"); // force Windows path to forward slashes
+    const line = match[2];
 
-        // Use iframe to avoid tab issues
-        const iframe = document.getElementById("vscode-opener");
-        iframe.src = url;
-      });
-    }
+    // Build clean VS Code URI
+    const vscodeUrl = `vscode://file/${absPath}:${line}`;
+
+    // Optional debug output
+    console.log("Opening VS Code URL:", vscodeUrl);
+
+    // Show link to user (debug)
+    const linkDisplay = document.createElement("p");
+    linkDisplay.innerHTML = `<strong>VS Code Link:</strong> <a href="${vscodeUrl}" style="color: #4ade80;">${vscodeUrl}</a>`;
+    document.getElementById("output").appendChild(linkDisplay);
+
+    vscodeBtn.addEventListener("click", () => {
+      document.getElementById("vscode-opener").src = vscodeUrl;
+    });
+  } else {
+    console.warn("Could not parse data-source:", raw);
+  }
+}
+
+
+
   }
 
   function refresh() {
