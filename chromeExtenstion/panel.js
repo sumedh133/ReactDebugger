@@ -1,99 +1,181 @@
 document.addEventListener("DOMContentLoaded", () => {
   const nameEl = document.getElementById("name");
-  const sourceEl = document.getElementById("source");
   const propsEl = document.getElementById("props");
   const stateEl = document.getElementById("state");
   const tailwindEl = document.getElementById("tailwind");
   const output = document.getElementById("output");
+  const vscodeBtn = document.getElementById("vscode-btn");
+
+  const CLASS_GROUPS = {
+    Spacing: ["m", "p", "gap", "space"],
+    Sizing: ["w", "h", "min", "max"],
+    Layout: ["flex", "grid", "block", "inline", "absolute", "relative", "fixed"],
+    Text: ["text", "font", "leading", "tracking", "truncate", "whitespace"],
+    Color: ["bg", "text", "border", "from", "to", "via", "ring"],
+    Border: ["border", "rounded", "divide"],
+    Animation: ["transition", "animate", "duration", "ease", "delay"],
+    Effects: ["shadow", "opacity", "filter", "blur"],
+    Misc: ["cursor", "select", "z", "overflow", "align", "justify", "items", "content"]
+  };
 
   function safeSet(el, html) {
     el.innerHTML = html || "—";
   }
 
   function renderReact(name, props, state) {
-    console.log("📦 React Data:", { name, props, state });
     safeSet(nameEl, `🎯 ${name}`);
     propsEl.textContent = JSON.stringify(props, null, 2);
     stateEl.textContent = JSON.stringify(state.map((s) => s.value), null, 2);
   }
 
+  function categorizeTailwindClasses(classListStr) {
+    const classes = classListStr.trim().split(/\s+/);
+    const grouped = {};
+
+    for (const cls of classes) {
+      let added = false;
+      for (const [group, prefixes] of Object.entries(CLASS_GROUPS)) {
+        if (prefixes.some(prefix => cls.startsWith(prefix))) {
+          if (!grouped[group]) grouped[group] = [];
+          grouped[group].push(cls);
+          added = true;
+          break;
+        }
+      }
+      if (!added) {
+        if (!grouped["Other"]) grouped["Other"] = [];
+        grouped["Other"].push(cls);
+      }
+    }
+
+    return grouped;
+  }
+
+  function renderTailwindClasses(classListStr) {
+    if (!classListStr) {
+      tailwindEl.innerHTML = "—";
+      return;
+    }
+
+    const grouped = categorizeTailwindClasses(classListStr);
+    let html = "";
+
+    for (const group of Object.keys(grouped).sort()) {
+      html += `<div><strong>${group}</strong></div>`;
+      html += `<div class="tags" style="margin-bottom: 4px;">`;
+      html += grouped[group]
+        .sort((a, b) => a.localeCompare(b))
+        .map(cls => `<span class="tag">${cls}</span>`)
+        .join(" ");
+      html += `</div>`;
+    }
+
+    tailwindEl.innerHTML = html;
+  }
+
   function renderDOM(data) {
     const { outerHTML, classList, dataAttributes } = data;
+    renderTailwindClasses(classList);
 
-    // Tailwind class list
-    safeSet(tailwindEl, classList || "—");
-
-    // VS Code Source Line
     const sourceAttr = dataAttributes["data-source"];
     if (sourceAttr) {
-      safeSet(
-        sourceEl,
-        `<div class="file-link" id="open-in-vscode">📂 ${sourceAttr}</div>`
-      );
-
-      const vscodeBtn = document.getElementById("open-in-vscode");
       const match = sourceAttr.match(/^(.+?):(\d+)/);
       if (match) {
         const path = match[1].replace(/\\/g, "/");
         const line = match[2];
         const vscodeUrl = `vscode://file/${path}:${line}`;
 
-        vscodeBtn.addEventListener("click", () => {
+        vscodeBtn.style.display = "inline-block";
+        vscodeBtn.onclick = () => {
           const iframe = document.createElement("iframe");
           iframe.style.display = "none";
           iframe.src = vscodeUrl;
           document.body.appendChild(iframe);
-        });
-
-        console.log("🛠 VS Code URL:", vscodeUrl);
+        };
       } else {
-        console.warn("⚠️ Couldn’t parse source path:", sourceAttr);
+        vscodeBtn.style.display = "none";
       }
     } else {
-      sourceEl.innerText = "—";
+      vscodeBtn.style.display = "none";
     }
-
-    console.log("🔍 Data Attributes:", dataAttributes);
-    console.log("📄 Outer HTML:", outerHTML);
   }
 
-  function refresh() {
-    chrome.devtools.inspectedWindow.eval(`window.__inspectReactFiber?.()`);
-
+  function fetchDOMInfo() {
     chrome.devtools.inspectedWindow.eval(
-      `(() => {
+      `(${function() {
         const el = $0;
         if (!el) return null;
+
         const attrs = {};
         for (const attr of el.attributes) {
           if (attr.name.startsWith("data-")) {
             attrs[attr.name] = attr.value;
           }
         }
+
+        const originalStyle = window.getComputedStyle(el);
+        const rawClasses = el.className.split(/\\s+/);
+        const dummy = document.createElement(el.tagName);
+        dummy.style.all = 'initial';
+        document.body.appendChild(dummy);
+
+        const relevantProps = [
+          "display", "position", "top", "left", "right", "bottom",
+          "zIndex", "width", "height", "margin", "padding",
+          "color", "backgroundColor", "fontSize", "fontWeight",
+          "flexDirection", "justifyContent", "alignItems", "textAlign",
+          "overflow", "visibility", "opacity", "gap", "border", "borderRadius"
+        ];
+
+        const activeClasses = [];
+
+        for (const cls of rawClasses) {
+          dummy.className = cls;
+          const testStyle = getComputedStyle(dummy);
+          const matches = relevantProps.some(prop => testStyle[prop] === originalStyle[prop]);
+          if (matches) activeClasses.push(cls);
+        }
+
+        dummy.remove();
+
         return {
           outerHTML: el.outerHTML,
-          classList: el.className,
+          classList: activeClasses.join(" "),
           dataAttributes: attrs
         };
-      })()`,
+      }})()`,
       (result, exception) => {
         if (!exception && result) {
           renderDOM(result);
         } else {
-          sourceEl.innerHTML = "<p style='color:red;'>⚠️ Failed to get selected element.</p>";
+          vscodeBtn.style.display = "none";
+          output.innerHTML = "<p style='color:red;'>⚠️ Failed to get selected element.</p>";
         }
       }
     );
   }
 
-  document.getElementById("refresh").addEventListener("click", refresh);
-
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((message) => {
     if (message?.source === "react-inspector" && message.type === "fiberData") {
       const { name, props, state } = message.payload;
       renderReact(name, props, state);
     }
   });
 
-  refresh(); // Initial load
+  chrome.devtools.panels.elements.onSelectionChanged.addListener(() => {
+    chrome.devtools.inspectedWindow.eval(`window.__inspectReactFiber?.()`);
+    fetchDOMInfo();
+  });
+
+  // Initial load
+  setTimeout(() => {
+    chrome.devtools.inspectedWindow.eval(`!!$0`, (hasSelection) => {
+      if (hasSelection) {
+        chrome.devtools.inspectedWindow.eval(`window.__inspectReactFiber?.()`);
+        fetchDOMInfo();
+      } else {
+        output.innerHTML = "⚠️ Select a DOM node to inspect.";
+      }
+    });
+  }, 300);
 });
