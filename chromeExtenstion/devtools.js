@@ -35,21 +35,13 @@ function injectInspector() {
       return;
     }
 
-    // Store for future update triggers
     window.__reactFiberTarget = current;
-
-    // Start watching for dispatches
     patchFiberState(current);
-
-    // Inspect immediately
     inspectFiber(current);
   };
 
   function inspectFiber(current) {
     const name = current.type?.name || current.elementType?.name || "[Anonymous]";
-    console.clear();
-    console.log(`🎯 React Component: %c${name}`, "color: green; font-weight: bold;");
-    console.log("📦 Props:", current.memoizedProps);
 
     function extractHookStates(hookState) {
       const result = [];
@@ -67,10 +59,26 @@ function injectInspector() {
 
     const hookStates = extractHookStates(current.memoizedState);
 
+    console.clear();
+    console.log(`🎯 React Component: %c${name}`, "color: green; font-weight: bold;");
+    console.log("📦 Props:", current.memoizedProps);
     console.log("🧠 State Hooks:");
     hookStates.forEach(({ index, value }) => {
       console.log(`State[${index}]:`, value);
     });
+
+    const cleanedProps = safeClone(current.memoizedProps);
+    const cleanedState = safeClone(hookStates);
+
+    window.postMessage({
+      source: "react-inspector",
+      type: "fiberData",
+      payload: {
+        name,
+        props: cleanedProps,
+        state: cleanedState,
+      },
+    }, "*");
   }
 
   function patchFiberState(current) {
@@ -91,6 +99,19 @@ function injectInspector() {
       }
       hook = hook.next;
     }
+  }
+
+  function safeClone(obj) {
+    const seen = new WeakSet();
+    return JSON.parse(JSON.stringify(obj, (key, value) => {
+      if (typeof value === "function") return "[Function]";
+      if (typeof value === "symbol") return "[Symbol]";
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) return "[Circular]";
+        seen.add(value);
+      }
+      return value;
+    }));
   }
 
   console.log("✅ React Inspector helper injected.");

@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html>
-  <head><title>React Inspector Panel</title></head>
-  <body style="padding: 1em; font-family: monospace;">
-    <h2>React Inspector 🔍</h2>
-    <p>Open the Console to see component props/state.</p>
-    <p>Make sure you select a React DOM node in the Elements tab.</p>
+  <head>
+    <meta charset="UTF-8" />
+    <title>React Inspector</title>
+    <style>
+      body { font-family: sans-serif; padding: 10px; background: #f8f8f8; }
+      pre { background: #fff; padding: 10px; border-radius: 8px; overflow-x: auto; }
+    </style>
+  </head>
+  <body>
+    <h1>React Inspector</h1>
+    <div id="app">Select a React component…</div>
+    <script src="panel.js"></script>
   </body>
 </html>
