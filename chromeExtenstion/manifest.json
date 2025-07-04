@@ -1,8 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "React Inspector",
+  "name": "DevLens: React Inspector",
   "version": "1.0",
-  "description": "Custom React component debugger",
+  "description": "DevTools panel to inspect React component props, state, and source file info.",
+  "icons": {
+    "128": "icon.png"
+  },
   "permissions": ["scripting", "tabs"],
   "host_permissions": ["<all_urls>"],
 
@@ -21,6 +24,6 @@
   ],
 
   "action": {
-    "default_title": "React Inspector"
+    "default_title": "DevLens"
   }
 }
