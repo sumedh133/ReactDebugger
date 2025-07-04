@@ -1,11 +1,9 @@
 {
-  "name": "React Dev Helper",
+  "name": "React Inspector",
   "version": "1.0",
   "manifest_version": 3,
-  "description": "Custom DevTools panel to inspect selected elements",
+  "description": "Inspect selected React component props/state from DevTools.",
   "devtools_page": "devtools.html",
-  "host_permissions": ["<all_urls>"],
-  "icons": {
-    "128": "icon.png"
-  }
+  "permissions": [],
+  "host_permissions": ["<all_urls>"]
 }

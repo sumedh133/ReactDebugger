@@ -1,31 +1,9 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>DevTab Panel</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        padding: 1rem;
-        background: #fafafa;
-      }
-      button {
-        padding: 6px 12px;
-        margin-bottom: 10px;
-        font-size: 14px;
-        cursor: pointer;
-      }
-      pre {
-        background: #eee;
-        padding: 1rem;
-        white-space: pre-wrap;
-        word-break: break-word;
-      }
-    </style>
-  </head>
-  <body>
-    <button id="refresh">🔄 Refresh</button>
-    <div id="output">Click refresh to inspect selected element.</div>
-    <script src="panel.js"></script>
+  <head><title>React Inspector Panel</title></head>
+  <body style="padding: 1em; font-family: monospace;">
+    <h2>React Inspector 🔍</h2>
+    <p>Open the Console to see component props/state.</p>
+    <p>Make sure you select a React DOM node in the Elements tab.</p>
   </body>
 </html>
