@@ -5,135 +5,431 @@
   <title>DevLens Panel</title>
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #f9fafb;
-      --text: #111827;
-      --muted: #6b7280;
+      --primary: #0ea5e9;
+      --primary-hover: #0284c7;
+      --primary-light: #e0f2fe;
+      --bg: #f8fafc;
+      --bg-secondary: #f1f5f9;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
       --card-bg: #ffffff;
-      --border: #e5e7eb;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 8px;
+      --radius-sm: 4px;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, var(--bg) 0%, var(--bg-secondary) 100%);
       color: var(--text);
-      padding: 2rem;
-      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 100%;
+      padding: 1.5rem;
+      display: grid;
+      gap: 1.5rem;
     }
 
     h1 {
-      font-size: 1.75rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin: 0 0 2rem 0;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.75rem;
+      color: var(--text);
+      background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .section {
-      background-color: var(--card-bg);
+      background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .section:hover {
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
     }
 
     .section-header {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--border-light) 100%);
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.75rem;
     }
 
     .section h2 {
-      font-size: 1.15rem;
+      font-size: 1.125rem;
       font-weight: 600;
+      margin: 0;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section h2::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+      border-radius: 2px;
+    }
+
+    .section-content {
+      padding: 1.25rem;
     }
 
     .open-vscode-btn {
-      background-color: var(--primary);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
       color: white;
       border: none;
-      padding: 6px 10px;
-      font-size: 12px;
-      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
       cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 4px rgb(14 165 233 / 0.2);
     }
 
     .open-vscode-btn:hover {
-      background-color: var(--primary-hover);
+      background: linear-gradient(135deg, var(--primary-hover) 0%, #0369a1 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgb(14 165 233 / 0.3);
+    }
+
+    .open-vscode-btn:active {
+      transform: translateY(0);
     }
 
     .label {
-      font-weight: 500;
-      color: var(--muted);
-      margin: 0.5rem 0 0.25rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin: 1rem 0 0.5rem;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
     }
 
     .tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 0.5rem;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
     }
 
     .tag {
-      background: #f3f4f6;
-      padding: 3px 8px;
-      font-family: monospace;
-      border-radius: 4px;
-      font-size: 12px;
+      background: linear-gradient(135deg, var(--primary-light) 0%, #e0f2fe 100%);
+      color: var(--primary);
+      padding: 0.25rem 0.75rem;
+      font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 500;
+      border: 1px solid rgb(14 165 233 / 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .tag:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgb(14 165 233 / 0.3);
     }
 
     pre {
-      background: #f3f4f6;
-      padding: 12px;
-      border-radius: 6px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: var(--radius-sm);
       overflow-x: auto;
-      font-size: 13px;
-      max-height: 300px;
+      font-size: 0.875rem;
+      font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+      max-height: 400px;
+      line-height: 1.5;
+      color: var(--text);
     }
 
     #output {
+      background: var(--card-bg);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-muted);
       font-style: italic;
-      color: var(--muted);
       margin-top: 1rem;
     }
 
     #name {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 0.5rem;
+      color: var(--text);
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, var(--primary-light) 0%, #e0f2fe 100%);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgb(14 165 233 / 0.2);
+    }
+
+    /* JSON Search Styles */
+    .json-search-container {
+      margin: 1rem 0;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .json-search-container input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      background: var(--card-bg);
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+
+    .json-search-container input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgb(14 165 233 / 0.1);
+    }
+
+    .json-search-container button {
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .json-search-container button:first-of-type {
+      background: var(--primary);
+      color: white;
+    }
+
+    .json-search-container button:first-of-type:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .json-search-container button:last-of-type {
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .json-search-container button:last-of-type:hover {
+      background: var(--border);
+    }
+
+    .json-search-highlight {
+      background: linear-gradient(135deg, #fef08a 0%, #fde047 100%) !important;
+      color: #92400e !important;
+      padding: 0.125rem 0.25rem !important;
+      border-radius: 2px !important;
+      font-weight: 600 !important;
+    }
+
+    /* JSON Formatter Enhancements */
+    .json-formatter-row {
+      margin: 0.25rem 0;
+    }
+
+    .json-formatter-key {
+      color: var(--primary) !important;
+      font-weight: 600 !important;
+    }
+
+    .json-formatter-string {
+      color: var(--success) !important;
+    }
+
+    .json-formatter-number {
+      color: #f59e0b !important;
+    }
+
+    .json-formatter-boolean {
+      color: #8b5cf6 !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+        gap: 1rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .section-header {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
+
+      .json-search-container {
+        flex-direction: column;
+      }
+
+      .json-search-container input {
+        width: 100%;
+      }
+
+      .tags {
+        gap: 0.25rem;
+      }
+
+      .tag {
+        font-size: 0.6875rem;
+        padding: 0.125rem 0.5rem;
+      }
+    }
+
+    /* Loading Animation */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .loading {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* Enhanced Visual Feedback */
+    .section-content > div:not(.json-search-container) {
+      transition: all 0.2s ease;
+    }
+
+    .section-content > div:hover {
+      transform: translateX(2px);
+    }
+
+    /* Status Indicators */
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+
+    .status-active {
+      background: var(--success);
+      box-shadow: 0 0 8px rgb(16 185 129 / 0.4);
+    }
+
+    .status-inactive {
+      background: var(--text-muted);
     }
   </style>
 </head>
 <body>
-  <h1>🔍 DevLens Inspector</h1>
-
-  <div class="section">
-    <div class="section-header">
-      <h2>DOM Info</h2>
-      <button id="vscode-btn" class="open-vscode-btn" style="display: none;">📂 Open in VS Code</button>
+  <div class="container">
+    <h1>🔍 DevLens Inspector</h1>
+    
+    <div class="section">
+      <div class="section-header">
+        <h2>DOM Info</h2>
+        <button id="vscode-btn" class="open-vscode-btn" style="display: none;">
+          📂 Open in VS Code
+        </button>
+      </div>
+      <div class="section-content">
+        <div class="label">Tailwind Classes</div>
+        <div id="tailwind">—</div>
+      </div>
     </div>
-    <div class="label">Tailwind Classes</div>
-    <div id="tailwind">—</div>
+
+    <div class="section">
+      <div class="section-header">
+        <h2>React Component</h2>
+      </div>
+      <div class="section-content">
+        <div id="name">—</div>
+        <div class="label">Props</div>
+        <pre id="props">—</pre>
+        <div class="label">State</div>
+        <pre id="state">—</pre>
+      </div>
+    </div>
+
+    <div id="output">
+      <span class="status-indicator status-inactive"></span>
+      Select a React component or inspect an element.
+    </div>
   </div>
 
-  <div class="section">
-    <h2>React Component</h2>
-    <div id="name">—</div>
-    <div class="label">Props</div>
-    <pre id="props">—</pre>
-    <div class="label">State</div>
-    <pre id="state">—</pre>
-  </div>
-
-  <div id="output">Select a React component or inspect an element.</div>
   <script src="json-formatter.umd.js"></script>
   <script src="panel.js"></script>
 </body>
