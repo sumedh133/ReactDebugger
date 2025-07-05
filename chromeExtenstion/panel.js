@@ -1,3 +1,135 @@
+function addJsonSearch() {
+  // Create search container
+  const searchContainer = document.createElement('div');
+  searchContainer.className = 'json-search-container';
+  searchContainer.style = 'margin-bottom: 10px; display: flex; gap: 5px;';
+  
+  // Create search input
+  const searchInput = document.createElement('input');
+  searchInput.type = 'text';
+  searchInput.placeholder = 'Search in props and state...';
+  searchInput.style = 'flex-grow: 1; padding: 5px; border: 1px solid #ccc; border-radius: 4px;';
+  
+  // Create search button
+  const searchButton = document.createElement('button');
+  searchButton.textContent = 'Search';
+  searchButton.style = 'padding: 5px 10px; background: #0078d7; color: white; border: none; border-radius: 4px; cursor: pointer;';
+  
+  // Create clear button
+  const clearButton = document.createElement('button');
+  clearButton.textContent = 'Clear';
+  clearButton.style = 'padding: 5px 10px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer;';
+  
+  // Append elements
+  searchContainer.appendChild(searchInput);
+  searchContainer.appendChild(searchButton);
+  searchContainer.appendChild(clearButton);
+  
+  // Insert before props and state sections
+  const propsHeader = document.querySelector('h3[data-section="props"]') || document.querySelector('h3:nth-of-type(1)');
+  if (propsHeader) {
+    propsHeader.parentNode.insertBefore(searchContainer, propsHeader);
+  } else {
+    document.getElementById('props').parentNode.insertBefore(searchContainer, document.getElementById('props'));
+  }
+  
+  // Expand nodes function
+  function expandAllNodes() {
+    const togglers = document.querySelectorAll('.json-formatter-row:not(.json-formatter-open) > .json-formatter-toggler-link');
+    if (togglers.length === 0) return false; // No more to expand
+    
+    togglers.forEach(toggler => toggler.click());
+    return true; // We expanded some nodes
+  }
+  
+  // Recursive expand function
+  function expandAllRecursively(callback) {
+    if (expandAllNodes()) {
+      // If we expanded nodes, there might be more nested ones, so wait a bit and try again
+      setTimeout(() => expandAllRecursively(callback), 50);
+    } else {
+      // No more nodes to expand, now execute the callback
+      if (callback) callback();
+    }
+  }
+  
+  // Search in both expanded and collapsed content
+  function searchInJson() {
+    const searchTerm = searchInput.value.toLowerCase();
+    if (!searchTerm) return;
+    
+    // Function to perform the search after expansion
+    function performSearch() {
+      // Remove existing highlights
+      const highlights = document.querySelectorAll('.json-search-highlight');
+      highlights.forEach(el => {
+        el.classList.remove('json-search-highlight');
+      });
+      
+      // Search in key and value elements
+      const keyElements = document.querySelectorAll('.json-formatter-key');
+      const valueElements = document.querySelectorAll('.json-formatter-string, .json-formatter-number, .json-formatter-boolean');
+      
+      let foundElements = [];
+      
+      // Search in keys
+      keyElements.forEach(el => {
+        if (el.textContent.toLowerCase().includes(searchTerm)) {
+          el.classList.add('json-search-highlight');
+          foundElements.push(el);
+        }
+      });
+      
+      // Search in values
+      valueElements.forEach(el => {
+        if (el.textContent.toLowerCase().includes(searchTerm)) {
+          el.classList.add('json-search-highlight');
+          foundElements.push(el);
+        }
+      });
+      
+      // Scroll to first result
+      if (foundElements.length > 0) {
+        foundElements[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        alert('No matches found for: ' + searchTerm);
+      }
+    }
+    
+    // First expand all nodes, then search
+    expandAllRecursively(performSearch);
+  }
+  
+  // Clear search
+  function clearSearch() {
+    searchInput.value = '';
+    const highlights = document.querySelectorAll('.json-search-highlight');
+    highlights.forEach(el => {
+      el.classList.remove('json-search-highlight');
+    });
+  }
+  
+  // Add event listeners
+  searchButton.addEventListener('click', searchInJson);
+  clearButton.addEventListener('click', clearSearch);
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') searchInJson();
+  });
+}
+function addSearchStyles() {
+  const style = document.createElement('style');
+  style.textContent = `
+    .json-search-highlight {
+      background-color: yellow !important;
+      color: black !important;
+      padding: 0 2px !important;
+    }
+    .json-search-container {
+      margin: 10px 0;
+    }
+  `;
+  document.head.appendChild(style);
+}
 document.addEventListener("DOMContentLoaded", () => {
   const nameEl = document.getElementById("name");
   const propsEl = document.getElementById("props");
@@ -5,6 +137,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const tailwindEl = document.getElementById("tailwind");
   const output = document.getElementById("output");
   const vscodeBtn = document.getElementById("vscode-btn");
+  addSearchStyles();
+  addJsonSearch();
 
   const CLASS_GROUPS = {
     Spacing: ["m", "p", "gap", "space"],
