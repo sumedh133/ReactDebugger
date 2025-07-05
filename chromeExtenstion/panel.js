@@ -22,10 +22,38 @@ document.addEventListener("DOMContentLoaded", () => {
     el.innerHTML = html || "—";
   }
 
+  // Updated renderReact function to use JSONFormatter
   function renderReact(name, props, state) {
     safeSet(nameEl, `🎯 ${name}`);
-    propsEl.textContent = JSON.stringify(props, null, 2);
-    stateEl.textContent = JSON.stringify(state.map((s) => s.value), null, 2);
+    
+    // Clear previous content
+    propsEl.innerHTML = '';
+    stateEl.innerHTML = '';
+    
+    // Format props with JSONFormatter
+    if (props && Object.keys(props).length > 0) {
+      const propsFormatter = new JSONFormatter(props, 1, {
+        hoverPreviewEnabled: true,
+        animateOpen: true,
+        animateClose: true
+      });
+      propsEl.appendChild(propsFormatter.render());
+    } else {
+      propsEl.textContent = '{}';
+    }
+    
+    // Format state with JSONFormatter
+    const stateValues = state.map(s => s.value);
+    if (stateValues && stateValues.length > 0) {
+      const stateFormatter = new JSONFormatter(stateValues, 1, {
+        hoverPreviewEnabled: true,
+        animateOpen: true,
+        animateClose: true
+      });
+      stateEl.appendChild(stateFormatter.render());
+    } else {
+      stateEl.textContent = '[]';
+    }
   }
 
   function categorizeTailwindClasses(classListStr) {
